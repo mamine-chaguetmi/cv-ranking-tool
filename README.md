@@ -1,29 +1,49 @@
 # Outil d’analyse et d’évaluation de CV
 
-Projet réalisé dans le cadre d’un stage au sein d’un cabinet de conseil spécialisé SAP.
+Projet réalisé dans le cadre d’un stage au sein de **Dinexus Conseil**, cabinet de conseil spécialisé dans le domaine SAP.
 
-L’objectif est de développer un outil permettant d’effectuer un **premier tri de candidatures** en analysant automatiquement un CV et en le comparant à une fiche de poste paramétrable.
+L’objectif du projet est de développer un outil permettant d’effectuer un **premier tri de candidatures** en analysant automatiquement un CV et en le comparant à une fiche de poste paramétrable.
 
-Le projet repose sur un système de **parsing et de scoring basé sur des règles métier explicables**, sans recours à l’intelligence artificielle.
+L’application repose sur un système de **parsing et de scoring basé sur des règles métier explicables**, sans recours à l’intelligence artificielle.
+
+**Technologies principales :** Python · Flask · pdfplumber · Regex · JSON · HTML/CSS
 
 ---
 
-## Objectifs
+## Confidentialité
+
+Ce projet ayant été réalisé dans un contexte professionnel, le **code source n’est pas publié** dans ce dépôt.
+
+Ce repository présente uniquement :
+
+- le fonctionnement général de l’application ;
+- son architecture ;
+- les principales fonctionnalités développées ;
+- les technologies utilisées ;
+- des captures d’écran de l’interface.
+
+Les données utilisées dans les captures d’écran sont fictives ou anonymisées.
+
+---
+
+## Objectif du projet
 
 L’application permet de :
 
 - importer un CV au format PDF, DOC ou DOCX ;
-- extraire automatiquement plusieurs informations du candidat ;
+- extraire automatiquement les principales informations du candidat ;
 - comparer le profil avec une fiche de poste ;
-- détecter les compétences présentes et manquantes ;
+- identifier les compétences présentes et manquantes ;
 - estimer l’expérience professionnelle ;
 - détecter le niveau d’études ;
+- analyser certaines langues demandées ;
 - calculer un score de pertinence sur 100 ;
-- attribuer un verdict RH ;
+- attribuer un verdict ;
 - afficher les résultats dans une interface web.
 
-Le but est d’aider le recruteur lors du premier tri des candidatures.  
-Le score constitue une **aide à la décision** et ne remplace pas la décision finale du recruteur.
+L’objectif est d’aider le recruteur lors du **premier tri des candidatures**.
+
+Le score constitue uniquement une **aide à la décision** et ne remplace pas l’évaluation finale du recruteur.
 
 ---
 
@@ -36,11 +56,46 @@ Le score constitue une **aide à la décision** et ne remplace pas la décision 
 - JSON
 - HTML
 - CSS
-- LibreOffice pour la conversion DOC/DOCX → PDF
+- LibreOffice pour la conversion des fichiers DOC/DOCX vers PDF
 
 ---
 
-## Structure du projet
+## Fonctionnement général
+
+```text
+CV
+ │
+ ▼
+Extraction du texte
+ │
+ ▼
+Parsing
+ │
+ ├── Identité
+ ├── Compétences
+ ├── Expérience
+ ├── Formation
+ ├── Langues
+ └── Localisation
+ │
+ ▼
+Comparaison avec la fiche de poste
+ │
+ ▼
+Scoring
+ │
+ ▼
+Verdict
+ │
+ ▼
+Affichage dans l’interface web
+```
+
+---
+
+## Architecture du projet
+
+Le code source n’étant pas publié, l’arborescence suivante présente uniquement l’**organisation générale de l’application**.
 
 ```text
 cv-ranking-ui/
@@ -66,7 +121,9 @@ cv-ranking-ui/
 └── README.md
 ```
 
-### `app.py`
+---
+
+## `app.py`
 
 Fichier principal de l’application.
 
@@ -74,13 +131,16 @@ Il permet notamment de :
 
 - lancer le serveur Flask ;
 - gérer l’import des CV ;
+- vérifier les formats de fichiers autorisés ;
 - appeler le module de parsing ;
 - appeler le module de scoring ;
 - transmettre les résultats aux différentes pages HTML.
 
-### `backend/parser.py`
+---
 
-Ce module analyse le contenu du CV afin d’en extraire les informations utiles.
+## Module de parsing
+
+Le module `backend/parser.py` analyse le contenu du CV afin d’en extraire les informations utiles.
 
 Il permet notamment de détecter :
 
@@ -95,19 +155,29 @@ Il permet notamment de détecter :
 - les langues ;
 - la localisation.
 
-L’analyse repose principalement sur des **expressions régulières**, des recherches de mots-clés et différentes règles de détection.
+L’analyse repose principalement sur :
 
-### `backend/scoring.py`
+- des expressions régulières ;
+- des recherches de mots-clés ;
+- des règles de détection définies dans l’application.
 
-Ce module compare les informations extraites du CV avec les critères définis dans la fiche de poste.
+---
 
-Il calcule les différents blocs du score et produit un résultat global sur 100.
+## Module de scoring
 
-### `data/offre.json`
+Le module `backend/scoring.py` compare les informations extraites du CV avec les critères définis dans la fiche de poste.
 
-La fiche de poste constitue le référentiel utilisé pour évaluer le CV.
+Il calcule plusieurs composantes du score avant de produire un résultat global sur **100 points**.
 
-Elle est stockée dans un fichier JSON afin de pouvoir être modifiée **sans changer le code Python**.
+Le système est volontairement basé sur des **règles métier explicables**, afin que le résultat puisse être facilement compris et justifié.
+
+---
+
+## Fiche de poste paramétrable
+
+La fiche de poste constitue le référentiel utilisé pour analyser le CV.
+
+Elle est stockée dans un fichier `offre.json`, ce qui permet de modifier les critères de recherche **sans modifier directement le code Python**.
 
 Exemple simplifié :
 
@@ -136,7 +206,7 @@ Exemple simplifié :
 }
 ```
 
-La fiche de poste peut contenir :
+La fiche de poste peut notamment contenir :
 
 - les compétences obligatoires ;
 - les compétences appréciées ;
@@ -147,7 +217,9 @@ La fiche de poste peut contenir :
 - les langues demandées ;
 - les pondérations utilisées pour le scoring.
 
-Le système permet également de regrouper différentes écritures d’une même compétence afin d’éviter les doublons, par exemple :
+Le système permet également de regrouper plusieurs écritures correspondant à une même compétence afin de limiter les doublons.
+
+Par exemple :
 
 ```text
 S/4HANA
@@ -155,16 +227,18 @@ S4HANA
 S/4 hana
 ```
 
+Ces différentes écritures peuvent être considérées comme correspondant à la même compétence.
+
 ---
 
 ## Système de scoring
 
-Le scoring est volontairement simple et explicable.
+Le scoring repose sur plusieurs critères définis dans la fiche de poste.
 
 Exemple de répartition :
 
 | Critère | Score maximum |
-|---|---:|
+| --- | ---: |
 | Compétences obligatoires | 50 |
 | Compétences appréciées | 20 |
 | Compétences bonus | 10 |
@@ -172,35 +246,39 @@ Exemple de répartition :
 | Formation | 5 |
 | **Total** | **100** |
 
-Les compétences obligatoires ont le poids le plus important.
+Les compétences obligatoires disposent du poids le plus important.
 
-Une compétence bonus ne doit pas permettre de compenser complètement l’absence d’une compétence obligatoire.
+L’objectif est notamment d’éviter qu’un candidat obtienne un score élevé uniquement grâce à des compétences secondaires alors que certaines compétences indispensables sont absentes.
 
 ---
 
 ## Verdict
 
-À partir du score obtenu, un verdict est attribué :
+À partir du score obtenu, l’application attribue un verdict permettant de faciliter la lecture du résultat.
 
 | Score | Verdict |
-|---|---|
+| --- | --- |
 | ≥ 75 | Profil pertinent |
 | 55 à 74 | À étudier |
 | < 55 | Peu pertinent |
 
-Ce verdict reste uniquement une aide au premier tri.
+Ce verdict reste uniquement une **aide au premier tri des candidatures**.
+
+La décision finale reste à la charge du recruteur.
 
 ---
 
 ## Interface web
 
-L’application dispose de trois pages principales.
+L’application dispose d’une interface web développée avec **Flask, HTML et CSS**.
 
-### `index.html`
+Elle comporte trois pages principales.
 
-Permet à l’utilisateur de déposer un CV.
+### Page d’accueil — `index.html`
 
-Les formats acceptés sont :
+La page d’accueil permet à l’utilisateur de déposer un CV.
+
+Formats acceptés :
 
 - PDF
 - DOC
@@ -208,23 +286,23 @@ Les formats acceptés sont :
 
 Un message d’erreur est affiché lorsqu’un format non autorisé est envoyé.
 
-### `result.html`
+### Page de résultat — `result.html`
 
-Affiche notamment :
+Cette page présente notamment :
 
 - le score global ;
 - le verdict ;
 - un résumé du scoring ;
-- les principaux éléments détectés.
+- les principaux éléments détectés dans le CV.
 
-### `details.html`
+### Page de détails — `details.html`
 
-Permet de consulter plus précisément les informations extraites du CV :
+Cette page permet de consulter plus précisément les informations extraites :
 
 - compétences trouvées ;
 - compétences manquantes ;
 - soft skills ;
-- expérience ;
+- expérience estimée ;
 - formation ;
 - langues ;
 - localisation ;
@@ -232,11 +310,57 @@ Permet de consulter plus précisément les informations extraites du CV :
 
 ---
 
-# Installation
+## Aperçu de l’interface
 
-## Prérequis
+> Les captures présentées dans ce repository utilisent uniquement des données fictives ou anonymisées.
 
-### macOS
+### Import d’un CV
+
+![Page d'accueil](screenshots/accueil.png)
+
+### Résultat de l’analyse
+
+![Résultat de l'analyse](screenshots/resultat.png)
+
+### Détails du profil
+
+![Détails du profil](screenshots/details.png)
+
+---
+
+## Gestion des fichiers DOC et DOCX
+
+Les fichiers PDF peuvent être analysés directement par l’application.
+
+Pour les fichiers DOC et DOCX, l’application utilise **LibreOffice en mode headless** afin de convertir automatiquement le document en PDF avant son analyse.
+
+Le fonctionnement général est donc :
+
+```text
+DOC / DOCX
+    │
+    ▼
+LibreOffice
+    │
+    ▼
+Conversion en PDF
+    │
+    ▼
+Extraction du texte
+    │
+    ▼
+Analyse
+```
+
+---
+
+## Installation
+
+> Le code source n’étant pas publié dans ce repository, cette section décrit uniquement l’environnement technique utilisé pendant le développement du projet.
+
+### Prérequis
+
+#### macOS
 
 - Python 3.x
 - pip
@@ -245,7 +369,7 @@ Permet de consulter plus précisément les informations extraites du CV :
 - LibreOffice
 - environnement virtuel Python recommandé
 
-### Windows
+#### Windows
 
 - Python 3.x
 - pip
@@ -262,9 +386,9 @@ Add Python to PATH
 
 ---
 
-## Installation des dépendances
+## Environnement Python
 
-Créer un environnement virtuel :
+Création d’un environnement virtuel :
 
 ```bash
 python -m venv .venv
@@ -276,19 +400,19 @@ python -m venv .venv
 source .venv/bin/activate
 ```
 
-### Windows – Invite de commandes
+### Windows — Invite de commandes
 
-```bash
+```cmd
 .venv\Scripts\activate
 ```
 
-### Windows – PowerShell
+### Windows — PowerShell
 
 ```powershell
 .venv\Scripts\Activate.ps1
 ```
 
-Installer ensuite les dépendances :
+Installation des principales dépendances :
 
 ```bash
 pip install flask pdfplumber
@@ -298,19 +422,19 @@ pip install flask pdfplumber
 
 ## Lancement de l’application
 
-Dans le dossier du projet :
+Pendant le développement, l’application était lancée avec :
 
 ```bash
 python app.py
 ```
 
-Sous Windows, il peut également être nécessaire d’utiliser :
+Sous Windows :
 
 ```bash
 py app.py
 ```
 
-Une fois le serveur lancé, ouvrir l’adresse affichée dans le terminal, généralement :
+Le serveur Flask est ensuite accessible localement, généralement à l’adresse :
 
 ```text
 http://127.0.0.1:5000
@@ -318,76 +442,24 @@ http://127.0.0.1:5000
 
 ---
 
-## Conversion des fichiers DOC / DOCX
-
-Les fichiers PDF peuvent être analysés directement.
-
-Pour les fichiers DOC et DOCX, l’application utilise **LibreOffice en mode headless** afin de les convertir automatiquement en PDF avant l’analyse.
-
-LibreOffice doit donc être installé sur l’ordinateur pour utiliser cette fonctionnalité.
-
----
-
-## Fonctionnement général
-
-```text
-CV
- │
- ▼
-Extraction du texte
- │
- ▼
-Parsing
- │
- ├── Identité
- ├── Compétences
- ├── Expérience
- ├── Formation
- ├── Langues
- └── Localisation
- │
- ▼
-Comparaison avec offre.json
- │
- ▼
-Scoring
- │
- ▼
-Verdict
- │
- ▼
-Affichage dans l’interface web
-```
-
----
-
-## Première approche du projet
-
-Avant le début du stage, une première version expérimentale du projet avait été développée en utilisant des techniques de **traitement automatique du langage naturel (NLP)** afin de comparer plusieurs CV avec une offre et de calculer leur pertinence.
-
-Cette première approche utilisait notamment Python pour l’analyse textuelle et C++ pour l’exécution du script, la récupération des scores et le classement des CV.
-
-Après échange avec l’entreprise, une seconde approche a été retenue pour le projet final : un système basé sur des **règles métier, du parsing et un scoring explicable**, mieux adapté aux besoins du recruteur.
-
----
-
 ## Limites actuelles
 
 Le projet reste un prototype.
 
-Certaines limites sont notamment liées à :
+Certaines limites concernent notamment :
 
 - la diversité des mises en page des CV ;
 - la détection automatique des noms et titres ;
 - l’estimation de certaines périodes d’expérience ;
 - les différentes formulations possibles d’une même compétence ;
-- la qualité du texte extrait depuis certains PDF.
+- la qualité du texte extrait depuis certains fichiers PDF ;
+- la détection de certaines informations lorsque la structure du CV est très atypique.
 
 ---
 
 ## Améliorations possibles
 
-Plusieurs évolutions peuvent être envisagées :
+Plusieurs évolutions pourraient être envisagées :
 
 - gérer plusieurs fiches de poste ;
 - permettre de modifier la fiche de poste directement depuis l’interface ;
@@ -397,12 +469,43 @@ Plusieurs évolutions peuvent être envisagées :
 - améliorer la détection des informations personnelles ;
 - permettre l’analyse de plusieurs CV simultanément ;
 - améliorer l’interface utilisateur ;
-- générer automatiquement un rapport de synthèse.
+- générer automatiquement un rapport de synthèse ;
+- ajouter des fonctionnalités de comparaison entre plusieurs candidatures.
 
 ---
 
-## Contexte
+## Contexte du projet
 
-Ce projet a été réalisé dans le cadre d’un stage étudiant au sein de **Dinexus Conseil**, cabinets spécialisés dans le domaine SAP.
+Ce projet a été réalisé dans le cadre d’un **stage étudiant chez Dinexus Conseil**, cabinet spécialisé dans le domaine SAP.
 
-Il avait pour objectif de répondre à un besoin concret : faciliter le premier tri des candidatures tout en conservant un fonctionnement simple, transparent et justifiable.
+L’objectif était de répondre à un besoin concret : faciliter le premier tri des candidatures grâce à un outil simple, configurable et transparent.
+
+Le projet m’a notamment permis de travailler sur :
+
+- le développement en Python ;
+- la création d’une application web avec Flask ;
+- le parsing de documents ;
+- les expressions régulières ;
+- la manipulation de données JSON ;
+- la conception d’un algorithme de scoring ;
+- la traduction de règles métier en logique informatique ;
+- la conception d’une interface permettant de présenter les résultats de manière claire.
+
+---
+
+## Auteur
+
+**Mohamed Amine Chaguetmi**
+
+Étudiant en **L3 Informatique — Parcours MIAGE**  
+Université de Haute-Alsace
+
+[LinkedIn](https://www.linkedin.com/in/mohamed-amine-chaguetmi)
+
+---
+
+## Remarque
+
+Ce repository constitue une **présentation portfolio du projet**.
+
+Le code source et les éventuelles données professionnelles associées au projet ne sont pas rendus publics.
