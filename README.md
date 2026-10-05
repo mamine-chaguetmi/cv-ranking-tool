@@ -403,6 +403,6 @@ Plusieurs évolutions peuvent être envisagées :
 
 ## Contexte
 
-Ce projet a été réalisé dans le cadre d’un stage étudiant au sein de **Ovie / Dinexus Conseil**, cabinets spécialisés dans le domaine SAP.
+Ce projet a été réalisé dans le cadre d’un stage étudiant au sein de **Dinexus Conseil**, cabinets spécialisés dans le domaine SAP.
 
 Il avait pour objectif de répondre à un besoin concret : faciliter le premier tri des candidatures tout en conservant un fonctionnement simple, transparent et justifiable.
